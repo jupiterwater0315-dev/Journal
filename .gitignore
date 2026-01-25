@@ -1,5 +1,6 @@
 node_modules/
 data.sqlite
-.env
+uploads/
+data/text-overrides.json
+*.log
 .DS_Store
-npm-debug.log*

@@ -224,6 +224,18 @@ function ensureSchema(dbx) {
     chart_image TEXT
   );`);
 
+// ---- migrations: trades override audit ----
+if (!hasColumn(dbx, "trades", "override_used")) {
+  exec(dbx, "ALTER TABLE trades ADD COLUMN override_used INTEGER DEFAULT 0;");
+}
+if (!hasColumn(dbx, "trades", "override_reason")) {
+  exec(dbx, "ALTER TABLE trades ADD COLUMN override_reason TEXT;");
+}
+if (!hasColumn(dbx, "trades", "override_rules")) {
+  exec(dbx, "ALTER TABLE trades ADD COLUMN override_rules TEXT;");
+}
+
+
   exec(dbx, `CREATE TABLE IF NOT EXISTS integration_sessions (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
@@ -951,6 +963,7 @@ app.get("/c1", authMiddleware, async (req, res) => {
       <button class="secondary" type="submit">Back</button>
     </form>
 
+    ${warnBox}
     ${errBox}
   </div>`;
   res.send(layout({ active: "Journal", userEmail: req.user.email, body, stateLabel: "C1" }));
@@ -1060,7 +1073,9 @@ app.get("/s2", authMiddleware, async (req, res) => {
   const breakPrice = st.breakPrice ?? "";
   const pullbackPrice = st.pullbackPrice ?? "";
   const rejectionCandles = st.rejectionCandles ?? "";
-  const entry3 = st.entry3 ?? "";
+  const entry3 = st?.entry3 ?? "";
+const softOverride = st.softOverride ? true : false;
+const overrideReason = st.overrideReason ?? "";
 
   const errBox = st._errors?.length
     ? `<div class="error"><b>Алдаа:</b><ul>${st._errors.map(e => `<li>${escapeHtml(e)}</li>`).join("")}</ul></div>`
@@ -1135,6 +1150,19 @@ app.get("/s2", authMiddleware, async (req, res) => {
       ${isBalance ? balanceBlock : ""}
       ${isImbalance ? imbalanceBlock : ""}
 
+
+<div style="margin-top:14px;">
+  <label style="display:flex; align-items:center; gap:8px;">
+    <input type="checkbox" name="softOverride" value="1" ${softOverride ? "checked" : ""}/>
+    Зөвшөөрөөд үргэлжлүүлэх (soft warning)
+  </label>
+  <div class="small muted">Rule зөрчсөн байсан ч тэмдэглээд цааш явна. Dashboard дээр Override гэж харагдана.</div>
+  <div class="field" style="margin-top:8px;">
+    <label>Override reason (яагаад rule зөрчсөн ч орсон бэ?)</label>
+    <textarea name="overrideReason" rows="2" style="width:100%; padding:10px; resize:vertical;">${escapeHtml(String(overrideReason||""))}</textarea>
+  </div>
+</div>
+
       <div style="margin-top:14px" class="row">
         <button type="submit">Validate & Next</button>
       </div>
@@ -1176,7 +1204,11 @@ app.post("/s2", authMiddleware, async (req, res) => {
 
   const touches = [req.body.touch1, req.body.touch2, req.body.touch3].map(parseNum);
 
-  const nextState = { ...st, instrument, val, vah, tickSize, tickValue, touches, _errors: [] };
+  const softOverride = (req.body.softOverride === "1" || req.body.softOverride === "on");
+  const overrideReason = String(req.body.overrideReason || "").trim();
+
+
+  const nextState = { ...st, instrument, val, vah, tickSize, tickValue, touches, _errors: [], _warnings: [] };
 
   if (st.tradeType === "BALANCE") {
     const balanceAnchor = String(req.body.balanceAnchor || "VAL");
@@ -1184,12 +1216,32 @@ app.post("/s2", authMiddleware, async (req, res) => {
     nextState.balanceAnchor = balanceAnchor;
     nextState.balanceEntry = balanceEntry;
 
-    const errs = validateBalance({ anchor: balanceAnchor, entry: balanceEntry, val, vah, tickSize });
-    if (errs.length) {
-      nextState._errors = errs;
+const errs = validateBalance({ anchor: balanceAnchor, entry: balanceEntry, val, vah, tickSize });
+if (errs.length) {
+  nextState.softOverride = softOverride ? 1 : 0;
+  nextState.overrideReason = overrideReason;
+  if (softOverride) {
+    if (!overrideReason || overrideReason.length < 3) {
+      nextState._errors = ["Override reason бичнэ үү (хамгийн багадаа 3 тэмдэгт).", ...errs];
       writeSessionState(dbx, req.sid, nextState, hist);
       return res.redirect("/s2");
     }
+    nextState._warnings = errs;
+    nextState.overrideUsed = 1;
+    nextState.overrideRules = errs.join(" | ");
+  } else {
+    nextState._errors = errs;
+    writeSessionState(dbx, req.sid, nextState, hist);
+    return res.redirect("/s2");
+  }
+} else {
+  // valid -> clear override
+  nextState.softOverride = 0;
+  nextState.overrideUsed = 0;
+  nextState.overrideReason = "";
+  nextState.overrideRules = "";
+}
+
 
     nextState.direction = (balanceAnchor === "VAL") ? "LONG" : "SHORT";
     nextState.entry = balanceEntry;
@@ -1230,11 +1282,30 @@ app.post("/s2", authMiddleware, async (req, res) => {
       }
     }
 
-    if (errs.length) {
-      nextState._errors = errs;
+if (errs.length) {
+  nextState.softOverride = softOverride ? 1 : 0;
+  nextState.overrideReason = overrideReason;
+  if (softOverride) {
+    if (!overrideReason || overrideReason.length < 3) {
+      nextState._errors = ["Override reason бичнэ үү (хамгийн багадаа 3 тэмдэгт).", ...errs];
       writeSessionState(dbx, req.sid, nextState, hist);
       return res.redirect("/s2");
     }
+    nextState._warnings = errs;
+    nextState.overrideUsed = 1;
+    nextState.overrideRules = errs.join(" | ");
+  } else {
+    nextState._errors = errs;
+    writeSessionState(dbx, req.sid, nextState, hist);
+    return res.redirect("/s2");
+  }
+} else {
+  nextState.softOverride = 0;
+  nextState.overrideUsed = 0;
+  nextState.overrideReason = "";
+  nextState.overrideRules = "";
+}
+
   }
 
   const nextHist = pushHistory(hist, st);
@@ -1644,24 +1715,26 @@ app.post("/s6", authMiddleware, async (req, res) => {
   const noteLen = String(st.p4_insight || st.note || "").trim().length;
 
   exec(dbx, `INSERT INTO trades (
-      user_id, created_at,
-      instrument, trade_type, direction,
-      entry, one_r, contracts, tick_size, tick_value, rr,
-      sl_price, tp_price, be_price,
-      result, pnl_r, pnl_s,
-      emotion, mode, body_scan, note_len,
-      raw_json, chart_image
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-    [
-      req.user.id, nowIso(),
-      instrument, String(st.tradeType || "CUSTOM"), String(st.direction || "LONG"),
-      Number(st.entry ?? 0), Number(st.oneR ?? 0), contracts, tickSize, tickValue, Number(rr),
-      st.slPrice ?? null, st.tpPrice ?? null, st.bePrice ?? null,
-      result, Number(pnlR), Number(pnlS),
-      st.emotion ?? null, st.mode ?? null, st.bodyScan ? 1 : 0, noteLen,
-      raw, uploadFilename
-    ]
-  );
+    user_id, created_at,
+    instrument, trade_type, direction,
+    entry, one_r, contracts, tick_size, tick_value, rr,
+    sl_price, tp_price, be_price,
+    result, pnl_r, pnl_s,
+    emotion, mode, body_scan, note_len,
+    override_used, override_reason, override_rules,
+    raw_json, chart_image
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+  [
+    req.user.id, nowIso(),
+    instrument, String(st.tradeType || "CUSTOM"), String(st.direction || "LONG"),
+    Number(st.entry ?? 0), Number(st.oneR ?? 0), contracts, tickSize, tickValue, Number(rr),
+    st.slPrice ?? null, st.tpPrice ?? null, st.bePrice ?? null,
+    result, Number(pnlR), Number(pnlS),
+    st.emotion ?? null, st.mode ?? null, st.bodyScan ? 1 : 0, noteLen,
+    st.overrideUsed ? 1 : 0, (st.overrideReason ?? null), (st.overrideRules ?? null),
+    raw, uploadFilename
+  ]
+);
   persistDb();
 
   // reset flow
@@ -1716,7 +1789,8 @@ app.get("/dashboard", authMiddleware, async (req, res) => {
       SUM(CASE WHEN result='SL' THEN 1 ELSE 0 END) as sl,
       COALESCE(SUM(pnl_r),0) as net_r,
       COALESCE(SUM(pnl_s),0) as net_s,
-      COALESCE(AVG(pnl_r),0) as avg_r
+      COALESCE(AVG(pnl_r),0) as avg_r,
+      SUM(CASE WHEN override_used=1 THEN 1 ELSE 0 END) as overrides
     FROM trades
     WHERE user_id = ?
   `, [req.user.id]) || { total:0,tp:0,be:0,sl:0,net_r:0,net_s:0,avg_r:0 };
@@ -1724,7 +1798,7 @@ app.get("/dashboard", authMiddleware, async (req, res) => {
   const winrate = stats.total ? ((stats.tp / stats.total) * 100) : 0;
 
   const recent = all(dbx, `
-    SELECT id, created_at, instrument, trade_type, direction, contracts, rr, result, pnl_r, pnl_s, emotion, chart_image
+    SELECT id, created_at, instrument, trade_type, direction, contracts, rr, result, pnl_r, pnl_s, emotion, override_used, override_reason, chart_image
     FROM trades
     WHERE user_id=?
     ORDER BY id DESC
@@ -1747,6 +1821,7 @@ app.get("/dashboard", authMiddleware, async (req, res) => {
       ${kpi("Net $", escapeHtml(Number(stats.net_s||0).toFixed(0)) + "$")}
       ${kpi("Avg R / Trade", escapeHtml(Number(stats.avg_r||0).toFixed(2)) + "R")}
       ${kpi("TP / BE / SL", `${escapeHtml(stats.tp)}/${escapeHtml(stats.be)}/${escapeHtml(stats.sl)}`)}
+      ${kpi("Overrides", escapeHtml(stats.overrides||0))}
     </div>
 
     <div class="dash-grid">
@@ -1755,7 +1830,7 @@ app.get("/dashboard", authMiddleware, async (req, res) => {
         ${recent.length ? `
           <table class="tight">
             <thead><tr>
-              <th>#</th><th>Time</th><th>Instr</th><th>Type</th><th>Dir</th><th>Contracts</th><th>RR</th><th>Result</th><th>R</th><th>$</th><th>Emotion</th><th>Chart</th>
+              <th>#</th><th>Time</th><th>Instr</th><th>Type</th><th>Dir</th><th>Contracts</th><th>RR</th><th>Result</th><th>R</th><th>$</th><th>Emotion</th><th>Override</th><th>Chart</th>
             </tr></thead>
             <tbody>
               ${recent.map(r => `
@@ -1771,6 +1846,7 @@ app.get("/dashboard", authMiddleware, async (req, res) => {
                   <td>${escapeHtml(Number(r.pnl_r||0).toFixed(2))}</td>
                   <td>${escapeHtml(Number(r.pnl_s||0).toFixed(0))}</td>
                   <td>${escapeHtml(r.emotion || "")}</td>
+                  <td>${r.override_used ? `<span class="badge" title="${escapeHtml(String(r.override_reason||""))}">OVR</span>` : "—"}</td>
                   <td>${r.chart_image ? `<a href="/uploads/${escapeHtml(r.chart_image)}" target="_blank">View</a>` : "—"}</td>
                 </tr>
               `).join("")}
@@ -1790,7 +1866,8 @@ app.get("/export/trades.csv", authMiddleware, async (req, res) => {
   const dbx = await getDb();
   const rows = all(dbx, `
     SELECT created_at, instrument, trade_type, direction, entry, one_r, contracts, rr,
-           sl_price, tp_price, be_price, result, pnl_r, pnl_s, emotion, mode, chart_image
+           sl_price, tp_price, be_price, result, pnl_r, pnl_s, emotion, mode,
+           override_used, override_reason, override_rules, chart_image
     FROM trades
     WHERE user_id=?
     ORDER BY id ASC
