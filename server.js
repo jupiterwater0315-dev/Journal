@@ -1060,8 +1060,8 @@ app.get("/s2", authMiddleware, async (req, res) => {
 
   const val = st.val ?? "";
   const vah = st.vah ?? "";
-  const tickSize = st.tickSize ?? preset.tickSize;
-  const tickValue = st.tickValue ?? preset.tickValue;
+  const tickSize = preset.tickSize;
+  const tickValue = preset.tickValue;
 
   const touches = Array.isArray(st.touches) ? st.touches : ["", "", ""];
   while (touches.length < 3) touches.push("");
@@ -1172,6 +1172,24 @@ const overrideReason = st.overrideReason ?? "";
       <button class="secondary" type="submit">Back</button>
     </form>
 
+<script>
+(() => {
+  const PRESETS = {"CL": {"tickSize": 0.01, "tickValue": 10}, "ES": {"tickSize": 0.25, "tickValue": 12.5}, "NQ": {"tickSize": 0.25, "tickValue": 5}, "GC": {"tickSize": 0.1, "tickValue": 10}};
+  const sel = document.querySelector('select[name="instrument"]');
+  const tickSizeEl = document.querySelector('input[name="tickSize"]');
+  const tickValueEl = document.querySelector('input[name="tickValue"]');
+  if (!sel || !tickSizeEl || !tickValueEl) return;
+  function apply(k) {
+    const p = PRESETS[k];
+    if (!p) return;
+    tickSizeEl.value = String(p.tickSize);
+    tickValueEl.value = String(p.tickValue);
+  }
+  sel.addEventListener('change', (e) => apply(e.target.value));
+  apply(sel.value);
+})();
+</script>
+
     ${errBox}
   </div>
   `;
@@ -1206,7 +1224,6 @@ app.post("/s2", authMiddleware, async (req, res) => {
 
   const softOverride = (req.body.softOverride === "1" || req.body.softOverride === "on");
   const overrideReason = String(req.body.overrideReason || "").trim();
-
 
   const nextState = { ...st, instrument, val, vah, tickSize, tickValue, touches, _errors: [], _warnings: [] };
 
