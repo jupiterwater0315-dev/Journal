@@ -941,6 +941,9 @@ app.get("/c1", authMiddleware, async (req, res) => {
         <div class="field"><label>Tick value ($/tick, 1 contract)</label><input name="tickValue" value="${escapeHtml(tickValue)}" readonly/></div>
       </div>
 
+      <script>window.__INSTRUMENTS__ = ${JSON.stringify(INSTRUMENTS)};</script>
+      <script src="/public/instrument_autofill.js"></script>
+
       <div class="row">
         <div class="field">
           <label>Direction</label>
@@ -1060,8 +1063,8 @@ app.get("/s2", authMiddleware, async (req, res) => {
 
   const val = st.val ?? "";
   const vah = st.vah ?? "";
-  const tickSize = preset.tickSize;
-  const tickValue = preset.tickValue;
+  const tickSize = st.tickSize ?? preset.tickSize;
+  const tickValue = st.tickValue ?? preset.tickValue;
 
   const touches = Array.isArray(st.touches) ? st.touches : ["", "", ""];
   while (touches.length < 3) touches.push("");
@@ -1134,20 +1137,30 @@ const overrideReason = st.overrideReason ?? "";
         <div class="field"><label>Tick size</label><input name="tickSize" value="${escapeHtml(tickSize)}" readonly/></div>
         <div class="field"><label>Tick value ($/tick, 1 contract)</label><input name="tickValue" value="${escapeHtml(tickValue)}" readonly/></div>
       </div>
+<hr/>
+<div class="section-title-row" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+  <div><b>Touches (3+)</b></div>
+  <button type="button" id="addTouchBtn">+ Add touch</button>
+</div>
 
-      <hr/>
-      <div><b>Touches (3+)</b></div>
-      <div class="row">
-        ${touches.slice(0,3).map((t,i)=>`
-          <div class="field">
-            <label>Touch #${i+1}</label>
-            <input name="touch${i+1}" value="${escapeHtml(t)}" required/>
-          </div>
-        `).join("")}
+<div id="touchesBox" class="row">
+  ${touches.slice(0,3).map((t,i)=>`
+    <div class="field touch-field">
+      <label>Touch #${i+1}</label>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <input name="touch${i+1}" value="${escapeHtml(t)}" required/>
+        <button type="button" class="remove-touch" title="Remove" style="display:none; padding:4px 8px; border-radius:10px;">✕</button>
       </div>
+    </div>
+  `).join("")}
+</div>
 
-      <hr/>
-      ${isBalance ? balanceBlock : ""}
+<script src="/public/s2_touches.js"></script>
+
+<script>window.__INSTRUMENTS__ = ${JSON.stringify(INSTRUMENTS)};</script>
+<script src="/public/instrument_autofill.js"></script>
+<hr/>
+${isBalance ? balanceBlock : ""}
       ${isImbalance ? imbalanceBlock : ""}
 
 
@@ -1171,24 +1184,6 @@ const overrideReason = st.overrideReason ?? "";
     <form method="POST" action="/back_s2" style="margin-top:10px">
       <button class="secondary" type="submit">Back</button>
     </form>
-
-<script>
-(() => {
-  const PRESETS = {"CL": {"tickSize": 0.01, "tickValue": 10}, "ES": {"tickSize": 0.25, "tickValue": 12.5}, "NQ": {"tickSize": 0.25, "tickValue": 5}, "GC": {"tickSize": 0.1, "tickValue": 10}};
-  const sel = document.querySelector('select[name="instrument"]');
-  const tickSizeEl = document.querySelector('input[name="tickSize"]');
-  const tickValueEl = document.querySelector('input[name="tickValue"]');
-  if (!sel || !tickSizeEl || !tickValueEl) return;
-  function apply(k) {
-    const p = PRESETS[k];
-    if (!p) return;
-    tickSizeEl.value = String(p.tickSize);
-    tickValueEl.value = String(p.tickValue);
-  }
-  sel.addEventListener('change', (e) => apply(e.target.value));
-  apply(sel.value);
-})();
-</script>
 
     ${errBox}
   </div>
