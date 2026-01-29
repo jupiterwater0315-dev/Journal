@@ -1496,7 +1496,7 @@ app.get("/s3", authMiddleware, async (req, res) => {
 
   const body = `
   <div class="card">
-    <h2>Screen 3 — Risk</h2>
+    <h2>Risk Managment</h2>
     ${errBox}
     <ul>
       <li>Instrument: <b>${escapeHtml(instrument)}</b> — ${escapeHtml(preset.label)}</li>
@@ -1509,23 +1509,17 @@ app.get("/s3", authMiddleware, async (req, res) => {
     <form method="POST" action="/s3">
       <div class="row">
         <div class="field" style="max-width:220px">
-          <label>Contracts (гэрээний тоо)</label>
+          <label>Гэрээ лотны хэмжээ</label>
           <input name="contracts" value="${escapeHtml(String(contracts))}" required/>
         </div>
         <div class="field" style="max-width:220px">
-          <label>RR (TP = +RR)</label>
+          <label>TP=? RR</label>
           <input name="rr" value="${escapeHtml(String(rr))}" required/>
         </div>
         <div class="field" style="max-width:260px">
-          <label>1R = ? $ (risk per trade)</label>
+          <label>Sl=?$ (Эрсдэлийн хэмжээ)</label>
           <input name="oneR" value="${escapeHtml(String(oneR))}" required/>
         </div>
-      </div>
-
-      <div class="small" style="margin-top:8px">
-        Тооцоо: 1R ticks ≈ ${escapeHtml(ticksRaw===null?"—":ticksRaw.toFixed(2))}
-        → <b>${escapeHtml(ticksRounded===null?"—":String(ticksRounded))} ticks</b>
-        (Actual 1R ≈ $${escapeHtml(oneRActual===null?"—":String(oneRActual))})
       </div>
 
       <div style="margin-top:12px" class="row">
@@ -1607,7 +1601,7 @@ app.get("/s4", authMiddleware, async (req, res) => {
 
   const body = `
   <div class="card">
-    <h2>Screen 4 — Levels (auto)</h2>
+    <h2>SL, Be, TP авах цэгүүд </h2>
     <div class="kpis">
       <span class="kpi">${escapeHtml(st.tradeType||"—")}</span>
       <span class="kpi">${escapeHtml(dir||"—")}</span>
@@ -1619,8 +1613,7 @@ app.get("/s4", authMiddleware, async (req, res) => {
     </div>
     <hr/>
     <div class="small">
-      1R ticks ≈ ${escapeHtml(ticksRaw===null?"—":ticksRaw.toFixed(2))} → <b>${escapeHtml(tickR===null?"—":String(tickR))} ticks</b>
-      | TickSize: ${escapeHtml(String(tickSize))} | TickValue: $${escapeHtml(String(tickValue))}/tick/contract
+      
     </div>
     <ul>
       <li>SL (-1R): <b>${escapeHtml(sl)}</b></li>
@@ -1814,7 +1807,7 @@ app.post("/s5", authMiddleware, async (req, res) => {
 app.get("/s6", authMiddleware, async (req, res) => {
   const body = `
   <div class="card">
-    <h2>Screen 6 — Trade result</h2>
+    <h2>Арилжааны үр дүн</h2>
     <form method="POST" action="/s6" enctype="multipart/form-data">
       <div class="field" style="max-width:420px">
         <label>Chart screenshot (PNG/JPG)</label>
@@ -1878,27 +1871,28 @@ app.post("/s6", authMiddleware, async (req, res) => {
   const raw = JSON.stringify(st);
   const noteLen = String(st.p4_insight || st.note || "").trim().length;
 
-  exec(dbx, `INSERT INTO trades (
-    user_id, created_at,
-    instrument_type, instrument, trade_type, direction,
-    entry, one_r, contracts, tick_size, tick_value, rr,
-    sl_price, tp_price, be_price,
-    result, pnl_r, pnl_s,
-    emotion, mode, body_scan, note_len,
-    override_used, override_reason, override_rules,
-    raw_json, chart_image
-  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-  [
-    req.user.id, nowIso(),
-    instrumentType, instrument, String(st.tradeType || "CUSTOM"), String(st.direction || "LONG"),
-    Number(st.entry ?? 0), Number(st.oneR ?? 0), contracts, tickSize, tickValue, Number(rr),
-    st.slPrice ?? null, st.tpPrice ?? null, st.bePrice ?? null,
-    result, Number(pnlR), Number(pnlS),
-    st.emotion ?? null, st.mode ?? null, st.bodyScan ? 1 : 0, noteLen,
-    st.overrideUsed ? 1 : 0, (st.overrideReason ?? null), (st.overrideRules ?? null),
-    raw, uploadFilename
-  ]
-);
+const values = [
+  req.user.id, nowIso(),
+  instrumentType, instrument, String(st.tradeType || "CUSTOM"), String(st.direction || "LONG"),
+  Number(st.entry ?? 0), Number(st.oneR ?? 0), contracts, tickSize, tickValue, Number(rr),
+  st.slPrice ?? null, st.tpPrice ?? null, st.bePrice ?? null,
+  result, Number(pnlR), Number(pnlS),
+  st.emotion ?? null, st.mode ?? null, st.bodyScan ? 1 : 0, noteLen,
+  st.overrideUsed ? 1 : 0, (st.overrideReason ?? null), (st.overrideRules ?? null),
+  raw, uploadFilename
+];
+
+exec(dbx, `INSERT INTO trades (
+  user_id, created_at,
+  instrument_type, instrument, trade_type, direction,
+  entry, one_r, contracts, tick_size, tick_value, rr,
+  sl_price, tp_price, be_price,
+  result, pnl_r, pnl_s,
+  emotion, mode, body_scan, note_len,
+  override_used, override_reason, override_rules,
+  raw_json, chart_image
+) VALUES (${values.map(() => "?").join(",")})`, values);
+
   persistDb();
 
   // reset flow

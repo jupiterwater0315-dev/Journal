@@ -194,3 +194,54 @@ input, select, textarea{
 
 .warn{border:1px solid #f6e58d;background:rgba(253,230,138,0.10);color:#fde68a;border-radius:10px;padding:12px;margin-top:12px;font-size:13px}
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid rgba(253,230,138,0.4);color:#fde68a;background:rgba(253,230,138,0.08)}
+
+
+
+
+/* ===============================
+   INTEGRATION READABILITY OVERRIDE
+   =============================== */
+
+.integration {
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+/* inline font-size-ийг дарна */
+.integration .small,
+.integration .muted,
+.integration p,
+.integration li,
+.integration label,
+.integration span {
+  font-size: 17px !important;
+  line-height: 1.65;
+}
+
+/* Гарчгууд */
+.integration h2 {
+  font-size: 24px !important;
+}
+
+.integration h3 {
+  font-size: 20px !important;
+}
+
+/* Callout / therapy boxes */
+.integration .callout,
+.integration .therapy-box {
+  font-size: 17px !important;
+}
+
+/* Form controls */
+.integration select,
+.integration input,
+.integration textarea {
+  font-size: 16px !important;
+}
+
+/* Timer */
+.integration .kpi,
+.integration #intTimer {
+  font-size: 18px !important;
+}

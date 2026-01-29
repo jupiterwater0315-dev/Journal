@@ -40,7 +40,7 @@ const DEFAULT_COPY = {
 
   // --- Editable labels & options (admin) ---
   lbl_emotion: "Одоогийн мэдрэмж",
-  opt_emotions: "Айдас\nУур\nГуниг\nИчгүүр\nТодорхойгүй",
+  opt_emotions: "Айдас\nУур\nГуниг\nИчгүүр\nБаяр хөөр",
 
   lbl_p1_bodyLocation: "Биеийн аль хэсэгт хамгийн тод байна?",
   opt_bodyLocations: "Толгой\nНүүр\nХоолой\nЦээж\nГэдэс\nНуруу\nГар\nХөл\nБүх бие",
@@ -53,14 +53,14 @@ const DEFAULT_COPY = {
   lbl_intensity_note: "Үнэлгээ өгсний дараа мэдрэмжээ 1–2 өгүүлбэрээр бич",
   ph_intensity_note: "Ж: Цээж базалж, амьсгал давчдана...",
 
-  lbl_p2_fixing: "Үүнийг засах хэрэгтэй юм шиг санагдаж байна уу?",
+  lbl_p2_fixing: "Энэ мэдрэмжийг засах хэрэгтэй юм шиг санагдаж байна уу?",
   opt_yesno: "Тийм\nҮгүй",
-  lbl_p2_observing: "Эсвэл зүгээр ажиглаж чадаж байна уу? Энэ мэдрэмж ямар хэлбэртэй байна?",
-  opt_p2_shapes: "Хатуу\nЗөөлөн\nДүүрэн\nДаралттай\nХөнгөн\nЧангаралттай\nХөдөлгөөнтэй\nХөдөлгөөнгүй\nБусад",
+  lbl_p2_observing: "Энэ мэдрэмж ямар хэлбэртэй байна?",
+  opt_p2_shapes: "Хатуу\nЗөөлөн\nДүүрэн\nДаралттай\nХөнгөн\nЧангаралттай\nХөдөлгөөнтэй\nХөдөлгөөнгүй",
 
   lbl_p3_release: "Бие дээр сулрал / дулаан / чимчигнэх гарч байна уу?",
   lbl_p3_releaseLocation: "Хэрвээ тийм бол хаана?",
-  opt_releaseLocations: "Толгой\nХоолой\nЦээж\nГэдэс\nГар\nХөл\nБусад",
+  opt_releaseLocations: "Толгой\nХоолой\nЦээж\nГэдэс\nГар\nХөл",
   lbl_p3_staying: "Үүнийг ажиглаад суухад ямар байна?",
   opt_easyhard: "Амархан\nХэцүү",
   hint_releaseLocation_disabled: "Тийм сонгосон үед идэвхжнэ.",
@@ -68,7 +68,7 @@ const DEFAULT_COPY = {
   lbl_p4_change: "Эхний мэдрэмж өөрчлөгдсөн үү?",
   opt_change: "Бага\nИх\nӨөрчлөлтгүй",
   lbl_p4_insight: "Нэг өгүүлбэрээр: өнөөдөр чи юуг ‘засахгүйгээр’ зөвшөөрөв? (заавал бөглөнө)",
-  ph_p4_insight: "...",
+  ph_p4_insight: "Жнь Би айдас байгааг мэдэрлээ, Айдас бол би биш түүнийг миний биед байхыг зөвшөөрч чадсан. Эсвэл айдас маш хүчтэй орж ирлээ би байж сууж чадахгүй хяналтаа алдаж өөр юм хийсэн",
 
   btn_back: "Буцах",
   btn_next: "Үргэлжлүүлэх",
@@ -76,22 +76,22 @@ const DEFAULT_COPY = {
   btn_back_journal: "Буцах (Journal)",
 
 
-  p1_sub: "Одоо аюулгүй байна. Бие дээрээ зөөлөн анхаарлаа төвлөрүүл (30–90 сек).",
+  p1_sub: "Дотроо өөртөө хэл. Одоо миний бие аюулгүй байна. Бие дээрээ зөөлөн анхаарлаа төвлөрүүл (30–90 сек).",
   p1_guide_title: "Чиглүүлэг",
-  p1_guide_body: "Засах гэж оролдохгүй. Зүгээр л нэрлээд, байлга.",
-  p1_mantra: "БИ БОЛ ДҮРМЭЭ ДАГДАГ TRADER",
+  p1_guide_body: "Биед мэдрэгдэж байгаа мэдрэмжийг засах гэж оролдохгүй. Зүгээр л нэр өгөөд, дотогшоо мэдрээд хүлээн зөвшөөр.",
+  p1_mantra: "Хамраараа урт гүнзгий амьсгал аваад, удаанаар гарга (5 удаа) ",
   p1_li1:
-    "Мэдрэмжийн нэр: шахалт / хүндлэл / чангаралт / халуун-хүйтэн / чимчигнэх / чичрэх",
+    "Жишээ өгүүлбэр: “Би яаг одоо цээж дүүрэн шахалт өгсөн өвдөлт мэдэрч байна. би чамайг Айдас гэж нэрлэе”",
   p1_li2:
-    "Жишээ өгүүлбэр: “Цээжинд шахалт байна. Би үүнийг 30 секунд ажиглана.”",
+    " Чамайг би харж бас мэдэрч байна, чи энд байж болно би чамайг энд байхыг хүлээн зөвшөөрч байна.",
 
-  p2_sub: "Өөрчлөхгүй, түлхэхгүй. Байгаагаар нь зөвшөөр (30–90 сек).",
+  p2_sub: "Мэдрэмжийг өөрчлөх гэж оролдохгүй, түлхэхгүй. Байгаагаар нь зөвшөөр (30–90 сек).",
   p2_guide_title: "Чиглүүлэг",
   p2_guide_body: "Чиний зорилго — ‘алга болгох’ биш. ‘Зөвшөөрөөд’ үлдэх.",
-  p2_li1: "Асуулт: “Би үүнийг 10% ч гэсэн зөөлрүүлж, байлгаж чадах уу?”",
+  p2_li1: "Өөрийн сэтгэл хөдлөл мэдрэмжид тавих асуулт: “Чи юуг анхааруулах гэж байна вэ? Чи юуг хамгаалах гэж энд гарч ирэв? Хэрвээ чи дуу хоолойтой бол надад юу хэлэх вэ? Хариу нь: үг биш, дүр зураг, дурсамж, эсвэл зүгээр мэдрэмж байж болно, сайн ажиглаарай.",
   p2_li2: "Жишээ өгүүлбэр: “Одоо би засахгүй. Зөвхөн ажиглана.”",
 
-  p3_sub: "Бие өөрөө зохицуулна. Чи зөвхөн ажиглагч бай (30–90 сек).",
+  p3_sub: "Чи зөвхөн ажиглагч байгарай. Бие өөрөө зохицуулна. (30–90 сек).",
   p3_guide_title: "Чиглүүлэг",
   p3_guide_body: "Өөрчлөлт заавал том байх албагүй. Жижиг долгион ч байж болно.",
   p3_li1:
@@ -107,7 +107,7 @@ const DEFAULT_COPY = {
   p4_reflect_li1: "Асуулт: “Энэ мэдрэмж надад яг юу хэлэх гээд байна вэ?”",
   p4_reflect_li2: "Асуулт: “Би өнөөдөр юуг хүндэтгээд, юу ‘засахгүйгээр’ зөвшөөрөв?”",
   p4_reflect_li3:
-    "Жишээ insight: “Би яарахгүй байж чадна.” / “Алдаа гаргасан ч би өөрийгөө хаяхгүй.”"
+    "Жишээ: “Би яарахгүй байж чадна.” / “Алдаа гаргасан ч би өөрийгөө хаяхгүй.”"
 };
 
 
@@ -154,7 +154,7 @@ function phase1(st, copy) {
   const p1_li1 = pickCopy(copy, "p1_li1", DEFAULT_COPY.p1_li1);
   const p1_li2 = pickCopy(copy, "p1_li2", DEFAULT_COPY.p1_li2);
   return `
-    <h3 style="margin:0">Phase 1</h3>
+    <h3 style="margin:0">1-р шат</h3>
     <div class="small muted" style="margin-top:6px" data-copy="p1_sub">${esc(p1_sub)}</div>
 
     <div class="small therapy-box" style="margin-top:8px; padding:12px; border-radius:12px;">
@@ -192,7 +192,7 @@ function phase1(st, copy) {
 
     <div class="field" style="margin-top:10px">
       <label data-copy="lbl_intensity_note">${esc(pickCopy(copy,"lbl_intensity_note", DEFAULT_COPY.lbl_intensity_note))} <span class="muted">${esc(pickCopy(copy,"lbl_intensity_optional", DEFAULT_COPY.lbl_intensity_optional))}</span></label>
-      <textarea name="p1_intensityNote" rows="3" placeholder="Жишээ: “Цээжинд шахалт 7/10 байна. Би үүнийг 30 сек ажиглана.”">${esc(st.p1_intensityNote)}</textarea>
+      <textarea name="p1_intensityNote" rows="3" placeholder="Жишээ: Цээжинд шахалт 9/10 байна. Энэ мэдрэмж халуун бас хүчтэй дээшээ доошоо хөдөлж байна.Би үүнийг айдас гэж нэрлэе Би үүнийг 30 сек ажиглана.">${esc(st.p1_intensityNote)}</textarea>
     </div>
 
   `;
@@ -205,7 +205,7 @@ function phase2(st, copy) {
   const p2_li1 = pickCopy(copy, "p2_li1", DEFAULT_COPY.p2_li1);
   const p2_li2 = pickCopy(copy, "p2_li2", DEFAULT_COPY.p2_li2);
   return `
-    <h3 style="margin:0">Phase 2</h3>
+    <h3 style="margin:0">2-р шат</h3>
     <div class="small muted" style="margin-top:6px" data-copy="p2_sub">${esc(p2_sub)}</div>
 
     <div class="callout">
@@ -243,7 +243,7 @@ function phase3(st, copy) {
   const p3_li2 = pickCopy(copy, "p3_li2", DEFAULT_COPY.p3_li2);
   const rel = st.p3_release ?? "Үгүй";
   return `
-    <h3 style="margin:0">Phase 3</h3>
+    <h3 style="margin:0">3-р шат</h3>
     <div class="small muted" style="margin-top:6px" data-copy="p3_sub">${esc(p3_sub)}</div>
 
     <div class="callout">
@@ -294,7 +294,7 @@ function phase4(st, copy) {
   const emo = st.emotion || "Тодорхойгүй";
   const acceptText = p4_accept_body_tmpl.replaceAll("{emotion}", emo);
   return `
-    <h3 style="margin:0">Phase 4</h3>
+    <h3 style="margin:0">4-р шат</h3>
     <div class="small muted" style="margin-top:6px" data-copy="p4_sub">${esc(p4_sub)}</div>
 
     <div class="callout">
@@ -375,8 +375,8 @@ function renderScreen5({ st, cur, errHtml, copy }) {
   `;
 
   return `
-    <div class="card">
-      <h2>Screen 5 — Integration</h2>
+    <div class="card integration">
+      <h2>Integration</h2>
       ${safetyNote(c)}
       ${headerKpis(cur, st.emotion)}
       <div class="small callout therapy-box" style="margin-top:10px; padding:12px; border-radius:12px;">
