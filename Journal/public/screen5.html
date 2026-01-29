@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Journal v81 – Screen 5</title>
+  <style>
+    body { font-family: Arial; background:#0f172a; color:#e5e7eb; padding:20px; }
+    button { margin:6px; padding:8px 14px; }
+    .api-controls { background:#111827; padding:10px; border-radius:8px; }
+  </style>
+</head>
+<body>
+
+<h2>Screen 5 — Emotional Integration</h2>
+
+<label style="display:flex; gap:8px; align-items:center; margin:10px 0;">
+  <input type="checkbox" id="devModeToggle" />
+  <span>Developer mode</span>
+</label>
+
+<div id="apiControls" class="api-controls" style="display:none;">
+  <button>API Start</button>
+  <button>API Back</button>
+  <button>API Next</button>
+  <button>API Complete</button>
+</div>
+
+<hr>
+
+<p>Grounding → Allowing → Release → Reflection</p>
+
+<button>Back</button>
+<button>Next</button>
+<button>Complete</button>
+
+<script>
+(function devMode() {
+  const KEY = "journal_dev_mode";
+  const toggle = document.getElementById("devModeToggle");
+  const apiBox = document.getElementById("apiControls");
+  if (!toggle || !apiBox) return;
+
+  const isOn = localStorage.getItem(KEY) === "1";
+  toggle.checked = isOn;
+  apiBox.style.display = isOn ? "block" : "none";
+
+  toggle.addEventListener("change", () => {
+    const on = toggle.checked;
+    localStorage.setItem(KEY, on ? "1" : "0");
+    apiBox.style.display = on ? "block" : "none";
+  });
+})();
+</script>
+
+</body>
+</html>
